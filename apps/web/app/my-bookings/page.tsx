@@ -1,7 +1,129 @@
-import React from "react";
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
+import { ArrowLeft, Badge, Ticket } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Booking } from "utils/types";
 
 const page = () => {
-  return <div>page</div>;
+  const [myBookings, setMyBookings] = useState<Booking[]>([]);
+
+  const fetchBookings = async () => {
+    try {
+      const email = sessionStorage.getItem("myEmail");
+      const data = await fetch(
+        `http://localhost:3001/api/bookings/customer?email=${email}`,
+      );
+      console.log(data);
+
+      const res = await data.json();
+
+      const bookings: Booking[] = await res;
+      setMyBookings(bookings);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const findATicketPrice = (totalAmount: number, ticketCount: number) => {
+    return (totalAmount / ticketCount).toFixed(2);
+  };
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-indigo-950 dark:to-purple-950">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-8">
+          <h1 className="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
+            My Bookings
+          </h1>
+          <p className="text-slate-600">
+            View and manage your ticket purchases
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {myBookings.length === 0 ? (
+            <Card className={`border-slate-200 bg-white dark:bg-slate-900`}>
+              <CardContent className="py-12 text-center">
+                <Ticket className="mx-auto mb-4 h-16 w-16 text-slate-300" />
+                <h3 className="mb-2 text-xl font-semibold text-slate-900">
+                  No bookings yet
+                </h3>
+                <p className="text-slate-600">
+                  Start exploring events and book your tickets!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            myBookings.map((booking: Booking) => {
+              const priceDiff = booking.currentPrice - booking.totalAmount;
+              return (
+                <Card
+                  key={booking.id}
+                  className={`border-slate-200 bg-white transition-shadow hover:shadow-md dark:bg-slate-900`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                      <div className="flex-1">
+                        <h3 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+                          {booking.eventName}
+                        </h3>
+                        <div className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                          <p>Booking ID: {booking.id}</p>
+                          <p>Tickets: {booking.ticketCount}</p>
+                          <p>
+                            Per Ticket: $
+                            {findATicketPrice(
+                              booking.totalAmount,
+                              booking.ticketCount,
+                            )}
+                          </p>
+                          <p>
+                            Booked:{" "}
+                            {format(new Date(booking.createdAt), "PPpp")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 md:items-end">
+                        <div>
+                          <p className="text-sm text-slate-600 dark:text-slate-300">
+                            Price Paid
+                          </p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                            ${booking.totalAmount}
+                          </p>
+                          <p> Current Price</p>
+                        </div>
+
+                        {/* {priceDiff !== 0 && (
+                          <Badge
+                            className={
+                              priceDiff > 0
+                                ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                                : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+                            }
+                          >
+                            {priceDiff > 0 ? "📈" : "📉"}{" "}
+                            {priceDiff > 0 ? "Saved" : "Price dropped"} $
+                            {Math.abs(priceDiff).toFixed(2)}
+                          </Badge>
+                        )} */}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default page;

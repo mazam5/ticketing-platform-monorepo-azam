@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/ticketing-platform-monorepo"
+    "url": "https://github.com/mazam5/ticketing-platform-monorepo-azam"
   },
   "scripts": {
     "build": "turbo run build",
