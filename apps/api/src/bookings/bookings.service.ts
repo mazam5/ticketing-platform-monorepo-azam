@@ -47,7 +47,8 @@ export class BookingsService {
   ) {}
 
   async create(createBookingDto: CreateBooking) {
-    const { eventId, ticketCount, customerEmail } = createBookingDto;
+    const { eventId, ticketCount, customerEmail, amountPaid } =
+      createBookingDto;
 
     this.validateBookingInput(ticketCount, customerEmail);
     await this.checkRateLimit(customerEmail);
@@ -98,7 +99,7 @@ export class BookingsService {
           pricePerTicket = await this.calculateDynamicPrice(event, ticketCount);
         }
 
-        const totalAmount = pricePerTicket * ticketCount;
+        // const totalAmount = pricePerTicket * ticketCount;
 
         // Create booking
         const [booking] = await tx
@@ -107,7 +108,8 @@ export class BookingsService {
             eventId,
             ticketCount,
             customerEmail,
-            totalAmount: totalAmount.toFixed(2),
+            // totalAmount: totalAmount.toFixed(2),
+            totalAmount: amountPaid.toFixed(2),
           })
           .returning();
 

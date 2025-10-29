@@ -15,7 +15,6 @@ const page = () => {
       const data = await fetch(
         `${apiUrl}/api/bookings/customer?email=${email}`,
       );
-      console.log(data);
 
       const res = await data.json();
 
@@ -89,41 +88,35 @@ const page = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-2 md:items-end">
-                        <div>
-                          <p className="text-sm text-slate-600 dark:text-slate-300">
-                            Price Paid
-                          </p>
-                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            ${booking.totalAmount}
-                          </p>
-                          <p className="text-sm text-slate-600 dark:text-slate-300">
-                            Current Total Price
-                          </p>
-                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            ${booking.currentPrice * booking.ticketCount}
-                          </p>
-                          <p className="text-sm text-slate-600 dark:text-slate-300">
-                            1 Ticket Price
-                          </p>
-                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                            ${booking.currentPrice}
-                          </p>
-                        </div>
+                      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all md:items-end dark:border-slate-800 dark:bg-slate-900">
+                        <div className="space-y-3 text-right">
+                          {/* Price Paid */}
+                          <div>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                              Price Paid
+                            </p>
+                            <p className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+                              ${booking.totalAmount}
+                            </p>
+                          </div>
 
-                        {/* {priceDiff !== 0 && (
-                          <Badge
-                            className={
-                              priceDiff > 0
-                                ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
-                                : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
-                            }
-                          >
-                            {priceDiff > 0 ? "📈" : "📉"}{" "}
-                            {priceDiff > 0 ? "Saved" : "Price dropped"} $
-                            {Math.abs(priceDiff).toFixed(2)}
-                          </Badge>
-                        )} */}
+                          <div className="h-px bg-slate-200 dark:bg-slate-800" />
+
+                          <div>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                              Current Price
+                            </p>
+                            <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                              ${booking.currentPrice} × {booking.ticketCount}
+                            </p>
+                            <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                              = $
+                              {(
+                                booking.currentPrice * booking.ticketCount
+                              ).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

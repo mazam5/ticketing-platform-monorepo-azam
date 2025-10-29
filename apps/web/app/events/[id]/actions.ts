@@ -5,10 +5,12 @@ export async function handleBooking({
   eventId,
   email,
   quantity,
+  amountPaid,
 }: {
   eventId: string;
   email: string;
   quantity: number;
+  amountPaid: number;
 }) {
   try {
     const res = await fetch(`${apiUrl}/api/bookings`, {
@@ -18,6 +20,7 @@ export async function handleBooking({
         eventId,
         customerEmail: email,
         ticketCount: quantity,
+        amountPaid,
       }),
     });
 

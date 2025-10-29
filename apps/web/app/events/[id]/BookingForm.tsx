@@ -71,6 +71,7 @@ export function BookingForm({ event }: { event: Event }) {
         eventId: event.id,
         email,
         quantity,
+        amountPaid: totalPrice,
       });
 
       if (result.success) {

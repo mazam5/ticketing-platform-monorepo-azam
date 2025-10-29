@@ -93,7 +93,7 @@ export const pricingRulesSchema = z
     },
     {
       message: "Pricing rule weights must sum to 1",
-    },
+    }
   );
 
 export const createEventSchema = z.object({
@@ -112,6 +112,7 @@ export const createBookingSchema = z.object({
   eventId: z.uuid(),
   customerEmail: z.email(),
   ticketCount: z.number().int().positive().max(10),
+  amountPaid: z.number().int().positive(),
 });
 
 // Types

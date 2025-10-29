@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format } from "date-fns";
 import {
   ArrowRight,
   Calendar,
@@ -8,17 +9,13 @@ import {
   Download,
   Mail,
   MapPin,
-  Minus,
-  Ticket,
-  TrendingDown,
-  TrendingUp,
   Sparkles,
+  Ticket,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Booking } from "utils/types";
-import { format } from "date-fns";
 
 const BookingSuccessPage = () => {
   const { eventId } = useParams();
