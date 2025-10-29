@@ -97,7 +97,18 @@ const page = () => {
                           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                             ${booking.totalAmount}
                           </p>
-                          <p> Current Price</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-300">
+                            Current Total Price
+                          </p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                            ${booking.currentPrice * booking.ticketCount}
+                          </p>
+                          <p className="text-sm text-slate-600 dark:text-slate-300">
+                            1 Ticket Price
+                          </p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                            ${booking.currentPrice}
+                          </p>
                         </div>
 
                         {/* {priceDiff !== 0 && (

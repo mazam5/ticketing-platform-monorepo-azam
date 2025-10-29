@@ -8,8 +8,8 @@ import {
 } from "@nestjs/common";
 import { AdminAuthGuard } from "src/common/guards/admin-auth-guard";
 import { RedisService } from "src/redis/redis.service";
-import { db } from "../../../../packages/database/src/index";
-import { seed } from "../../../../packages/database/src/seed";
+import { db } from "@repo/database/src";
+import { seed } from "@repo/database/src/seed";
 import { SeedService } from "./seed.service";
 
 @Controller("seed")
@@ -18,7 +18,7 @@ export class SeedController {
 
   constructor(
     private readonly seedService: SeedService,
-    private readonly redisService: RedisService,
+    private readonly redisService: RedisService
   ) {}
   async checkDatabase(): Promise<{
     status: string;
@@ -31,7 +31,7 @@ export class SeedController {
       // Test basic database operations
       const versionResult = await db.execute("SELECT version() as version");
       const dbResult = await db.execute(
-        "SELECT current_database() as db_name, current_schema() as schema_name",
+        "SELECT current_database() as db_name, current_schema() as schema_name"
       );
 
       // Check if our tables exist
@@ -43,10 +43,10 @@ export class SeedController {
               `);
 
       const existingTables = tablesResult.rows.map(
-        (row: any) => row.table_name,
+        (row: any) => row.table_name
       );
       const missingTables = ["events", "bookings"].filter(
-        (table) => !existingTables.includes(table),
+        (table) => !existingTables.includes(table)
       );
 
       return {

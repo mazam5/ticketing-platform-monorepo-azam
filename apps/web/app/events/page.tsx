@@ -16,9 +16,6 @@ const EventsPage = async () => {
   const data = await fetch(`${apiUrl}/api/events`);
   const res = await data.json();
   const events: Event[] = await res.data;
-
-  console.log(events);
-
   const getAvailabilityColor = (remaining: any, capacity: any) => {
     const percentage = (remaining / capacity) * 100;
     if (percentage > 50) return "text-green-600 dark:text-green-400";

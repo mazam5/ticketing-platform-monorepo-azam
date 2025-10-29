@@ -5,7 +5,7 @@
 - [Node.js](https://nodejs.org/en) (v18.17 or higher)
 - [Pnpm](https://pnpm.io/) (v8 or higher)
 - [PostgreSQL](https://www.postgresql.org/) (v14 or higher)
-- [Redis](https://redis.io/) (v6 or higher) - optional, for caching
+- [Redis](https://redis.io/) (v6 or higher)
 
 ## Installation Steps
 

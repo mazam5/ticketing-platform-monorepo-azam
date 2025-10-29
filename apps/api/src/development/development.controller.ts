@@ -8,10 +8,10 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { AdminAuthGuard } from "../common/guards/admin-auth-guard";
-import { seed } from "../../../../packages/database/src/seed";
 import { EventsService } from "../events/events.service";
 import { RedisService } from "../redis/redis.service";
-import { db } from "../../../../packages/database/src/index";
+import { db } from "@repo/database/src";
+import { seed } from "@repo/database/src/seed";
 
 // Define local interfaces to avoid external dependency issues
 interface DatabaseHealth {
@@ -47,7 +47,7 @@ export class DevelopmentController {
 
   constructor(
     private readonly eventsService: EventsService,
-    private readonly redisService: RedisService,
+    private readonly redisService: RedisService
   ) {}
 
   @Get("health")
@@ -55,7 +55,7 @@ export class DevelopmentController {
     try {
       // Check database connection
       const dbResult = await db.execute(
-        "SELECT version() as version, current_database() as db_name, NOW() as current_time",
+        "SELECT version() as version, current_database() as db_name, NOW() as current_time"
       );
       const dbHealth: DatabaseHealth = {
         status: "connected",
@@ -133,7 +133,7 @@ export class DevelopmentController {
       // Test basic database operations
       const versionResult = await db.execute("SELECT version() as version");
       const dbResult = await db.execute(
-        "SELECT current_database() as db_name, current_schema() as schema_name",
+        "SELECT current_database() as db_name, current_schema() as schema_name"
       );
 
       // Check if our tables exist
@@ -145,10 +145,10 @@ export class DevelopmentController {
             `);
 
       const existingTables = tablesResult.rows.map(
-        (row: any) => row.table_name,
+        (row: any) => row.table_name
       );
       const missingTables = ["events", "bookings"].filter(
-        (table) => !existingTables.includes(table),
+        (table) => !existingTables.includes(table)
       );
 
       return {

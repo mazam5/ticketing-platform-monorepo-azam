@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, eq, gt } from "drizzle-orm";
-import { db, schema } from "../../../../packages/database/src";
-import { CreateEvent } from "../../../../packages/database/src/schema";
+import { db, schema } from "@repo/database/src/index";
+import type { CreateEvent } from "@repo/database/src/schema";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PricingService } from "../pricing/pricing.service";
 import { RedisService } from "../redis/redis.service";
 
@@ -9,7 +9,7 @@ import { RedisService } from "../redis/redis.service";
 export class EventsService {
   constructor(
     private readonly pricingService: PricingService,
-    private readonly redisService: RedisService,
+    private readonly redisService: RedisService
   ) {}
 
   async findAll() {
@@ -26,8 +26,8 @@ export class EventsService {
       .where(
         and(
           eq(schema.events.isActive, true),
-          gt(schema.events.date, new Date()),
-        ),
+          gt(schema.events.date, new Date())
+        )
       )
       .orderBy(asc(schema.events.date));
 

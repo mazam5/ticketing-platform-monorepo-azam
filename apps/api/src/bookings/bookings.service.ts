@@ -1,17 +1,17 @@
 import {
-  BadGatewayException,
+  Injectable,
+  NotFoundException,
   BadRequestException,
   ConflictException,
-  Injectable,
-  InternalServerErrorException,
+  BadGatewayException,
   Logger,
-  NotFoundException,
+  InternalServerErrorException,
 } from "@nestjs/common";
-import { desc, eq, sql } from "drizzle-orm";
-import { db, schema } from "../../../../packages/database/src";
-import { CreateBooking } from "../../../../packages/database/src/schema";
+import { db, schema } from "@repo/database/src/index";
 import { PricingService } from "../pricing/pricing.service";
 import { RedisService } from "../redis/redis.service";
+import { eq, desc, sql } from "drizzle-orm";
+import { CreateBooking } from "@repo/database/src/schema";
 
 export interface BookingWithEvent {
   id: string;
@@ -43,7 +43,7 @@ export class BookingsService {
 
   constructor(
     private readonly pricingService: PricingService,
-    private readonly redisService: RedisService,
+    private readonly redisService: RedisService
   ) {}
 
   async create(createBookingDto: CreateBooking) {
@@ -54,7 +54,7 @@ export class BookingsService {
 
     try {
       return await db.transaction(async (tx) => {
-        // Get event with FOR UPDATE to lock the row and include all necessary fields
+        // Get event with FOR UPDATE to lock the row
         const [event] = await tx
           .select({
             id: schema.events.id,
@@ -67,6 +67,7 @@ export class BookingsService {
             basePrice: schema.events.basePrice,
             floorPrice: schema.events.floorPrice,
             ceilingPrice: schema.events.ceilingPrice,
+            pricingRules: schema.events.pricingRules,
           })
           .from(schema.events)
           .where(eq(schema.events.id, eventId))
@@ -82,18 +83,18 @@ export class BookingsService {
         const newBookedTickets = event.bookedTickets + ticketCount;
         if (newBookedTickets > event.capacity) {
           throw new ConflictException(
-            `Not enough tickets available. Only ${event.capacity - event.bookedTickets} tickets remaining.`,
+            `Not enough tickets available. Only ${event.capacity - event.bookedTickets} tickets remaining.`
           );
         }
 
-        // Use current price from event or calculate fresh
+        // Determine price
         let pricePerTicket: number;
         const cachedPrice = await this.redisService.getEventPrice(eventId);
 
         if (cachedPrice !== null) {
           pricePerTicket = cachedPrice;
         } else {
-          // Calculate price based on current demand
+          // Calculate dynamic price safely
           pricePerTicket = await this.calculateDynamicPrice(event, ticketCount);
         }
 
@@ -110,20 +111,20 @@ export class BookingsService {
           })
           .returning();
 
-        // Update event booked tickets and price in a SINGLE query
+        // Update event booked tickets and price
         await tx.execute(sql`
-          UPDATE events 
-          SET 
-            booked_tickets = booked_tickets + ${ticketCount},
-            current_price = ${pricePerTicket.toFixed(2)},
-            updated_at = NOW()
-          WHERE id = ${eventId}
-        `);
+        UPDATE events
+        SET 
+          booked_tickets = booked_tickets + ${ticketCount},
+          current_price = ${pricePerTicket},
+          updated_at = NOW()
+        WHERE id = ${eventId}
+      `);
 
-        // Update price cache
+        // Update cache
         await this.redisService.setEventPrice(eventId, pricePerTicket);
 
-        // Clear all relevant caches
+        // Clear related caches
         await this.clearBookingCaches(eventId, customerEmail);
 
         return {
@@ -136,8 +137,7 @@ export class BookingsService {
       });
     } catch (error: any) {
       this.logger.error(
-        `Failed to create booking: ${error.message}`,
-        error.stack,
+        `Failed to create booking: ${error.message}, error.stack`
       );
       if (
         error instanceof ConflictException ||
@@ -228,10 +228,10 @@ export class BookingsService {
       return result;
     } catch (error: any) {
       this.logger.error(
-        `Failed to find bookings by customer: ${error.message}`,
+        `Failed to find bookings by customer: ${error.message}`
       );
       throw new InternalServerErrorException(
-        "Failed to retrieve customer bookings",
+        "Failed to retrieve customer bookings"
       );
     }
   }
@@ -269,7 +269,7 @@ export class BookingsService {
     } catch (error: any) {
       this.logger.error(`Failed to get booking stats: ${error.message}`);
       throw new InternalServerErrorException(
-        "Failed to retrieve booking statistics",
+        "Failed to retrieve booking statistics"
       );
     }
   }
@@ -289,7 +289,7 @@ export class BookingsService {
 
         if (booking.customerEmail !== customerEmail) {
           throw new BadRequestException(
-            "You can only cancel your own bookings",
+            "You can only cancel your own bookings"
           );
         }
 
@@ -302,7 +302,7 @@ export class BookingsService {
         // Check if event has already occurred
         if (event && new Date() > event.date) {
           throw new BadRequestException(
-            "Cannot cancel booking for an event that has already occurred",
+            "Cannot cancel booking for an event that has already occurred"
           );
         }
 
@@ -316,7 +316,7 @@ export class BookingsService {
           const newBookedTickets = event.bookedTickets - booking.ticketCount;
           const newPrice = await this.calculateDynamicPrice(
             event,
-            -booking.ticketCount,
+            -booking.ticketCount
           );
 
           await tx.execute(sql`
@@ -336,7 +336,7 @@ export class BookingsService {
         await this.clearBookingCaches(
           booking.eventId,
           customerEmail,
-          bookingId,
+          bookingId
         );
 
         return {
@@ -349,7 +349,7 @@ export class BookingsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to cancel booking: ${error.message}`,
-        error.stack,
+        error.stack
       );
       if (
         error instanceof NotFoundException ||
@@ -364,7 +364,7 @@ export class BookingsService {
   // Private helper methods
   private validateBookingInput(
     ticketCount: number,
-    customerEmail: string,
+    customerEmail: string
   ): void {
     if (ticketCount <= 0) {
       throw new BadRequestException("Ticket count must be greater than 0");
@@ -372,7 +372,7 @@ export class BookingsService {
 
     if (ticketCount > this.MAX_TICKETS_PER_BOOKING) {
       throw new BadRequestException(
-        `Cannot book more than ${this.MAX_TICKETS_PER_BOOKING} tickets at once`,
+        `Cannot book more than ${this.MAX_TICKETS_PER_BOOKING} tickets at once`
       );
     }
 
@@ -391,12 +391,12 @@ export class BookingsService {
     const canProceed = await this.redisService.checkRateLimit(
       rateLimitKey,
       this.RATE_LIMIT_COUNT,
-      this.RATE_LIMIT_WINDOW_MS,
+      this.RATE_LIMIT_WINDOW_MS
     );
 
     if (!canProceed) {
       throw new BadGatewayException(
-        "Too many booking attempts. Please try again in a minute.",
+        "Too many booking attempts. Please try again in a minute."
       );
     }
   }
@@ -413,29 +413,69 @@ export class BookingsService {
 
   private async calculateDynamicPrice(
     event: any,
-    ticketCountChange: number,
+    ticketCountChange: number
   ): Promise<number> {
-    // Simple dynamic pricing algorithm based on demand
     const basePrice = parseFloat(event.basePrice);
     const floorPrice = parseFloat(event.floorPrice);
     const ceilingPrice = parseFloat(event.ceilingPrice);
     const capacity = event.capacity;
     const currentBooked = event.bookedTickets;
 
-    // Calculate new booked tickets after this operation
+    const pricingRules = (() => {
+      try {
+        return typeof event.pricingRules === "string"
+          ? JSON.parse(event.pricingRules)
+          : event.pricingRules || {};
+      } catch {
+        return { timeBased: {}, inventoryBased: {} };
+      }
+    })();
+
+    // Inventory-based adjustment
     const newBookedTickets = currentBooked + ticketCountChange;
-    const utilizationRate = newBookedTickets / capacity;
+    const remaining = Math.max(capacity - newBookedTickets, 0);
+    const remainingRatio = remaining / capacity;
 
-    // Increase price as utilization increases (simple linear model)
-    let newPrice =
-      basePrice *
-      (1 +
-        utilizationRate * (Number(process.env.HIGH_UTILIZATION_WEIGHT) || 1)); // 50% max increase
+    let inventoryAdjustment = 0;
+    if (remainingRatio <= 0.2) {
+      inventoryAdjustment = pricingRules.inventoryBased?.adjustmentRate ?? 0.1;
+    } else {
+      inventoryAdjustment =
+        (1 - remainingRatio) *
+        (pricingRules.inventoryBased?.adjustmentRate ?? 0.08);
+    }
 
-    // Ensure price stays within bounds
-    newPrice = Math.max(floorPrice, Math.min(ceilingPrice, newPrice));
+    // Time-based adjustment
+    const eventDate = new Date(event.date);
+    const now = new Date();
+    const daysUntilEvent = Math.max(
+      (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      0
+    );
 
-    return Math.round(newPrice * 100) / 100; // Round to 2 decimal places
+    let timeAdjustment = 0;
+    if (daysUntilEvent <= 1) timeAdjustment = 0.5;
+    else if (daysUntilEvent <= 7) timeAdjustment = 0.2;
+    else if (daysUntilEvent <= 30) timeAdjustment = 0.1;
+
+    // Demand adjustment — removed / optional
+    const demandAdjustment = 0;
+
+    // Combine adjustments
+    const totalAdjustment =
+      (pricingRules.timeBased?.weight ?? 0.5) * timeAdjustment +
+      (pricingRules.inventoryBased?.weight ?? 0.2) * inventoryAdjustment +
+      (pricingRules.demandBased?.weight ?? 0.3) * demandAdjustment;
+
+    const priceAnchor =
+      event.currentPrice != null ? parseFloat(event.currentPrice) : basePrice;
+
+    let newPrice = priceAnchor * (1 + totalAdjustment);
+
+    return Math.max(
+      floorPrice,
+      Math.min(ceilingPrice, Math.round(newPrice * 100) / 100)
+    );
   }
 
   private async getCurrentPrice(eventId: string): Promise<number> {
@@ -468,7 +508,7 @@ export class BookingsService {
   private async clearBookingCaches(
     eventId: string,
     customerEmail: string,
-    bookingId?: string,
+    bookingId?: string
   ): Promise<void> {
     const cacheKeys = [
       `events:${eventId}`,
@@ -484,7 +524,7 @@ export class BookingsService {
     }
 
     await Promise.allSettled(
-      cacheKeys.map((key) => this.redisService.del(key)),
+      cacheKeys.map((key) => this.redisService.del(key))
     );
   }
 }
