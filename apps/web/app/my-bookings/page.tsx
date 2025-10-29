@@ -8,12 +8,12 @@ import { Booking } from "utils/types";
 
 const page = () => {
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const fetchBookings = async () => {
     try {
       const email = sessionStorage.getItem("myEmail");
       const data = await fetch(
-        `http://localhost:3001/api/bookings/customer?email=${email}`,
+        `${apiUrl}/api/bookings/customer?email=${email}`,
       );
       console.log(data);
 

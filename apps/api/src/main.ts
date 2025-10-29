@@ -20,12 +20,12 @@ async function performStartupChecks() {
   // Check environment variables
   const requiredEnvVars = ["DATABASE_URL"];
   const missingEnvVars = requiredEnvVars.filter(
-    (envVar) => !process.env[envVar]
+    (envVar) => !process.env[envVar],
   );
 
   if (missingEnvVars.length > 0) {
     logger.warn(
-      `⚠️ Missing environment variables: ${missingEnvVars.join(", ")}`
+      `⚠️ Missing environment variables: ${missingEnvVars.join(", ")}`,
     );
   } else {
     checks.configuration = true;
@@ -93,7 +93,7 @@ async function bootstrap() {
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
-      })
+      }),
     );
 
     // Enable CORS
@@ -112,7 +112,7 @@ async function bootstrap() {
     const dbStats = await getDatabaseStats();
     logger.log(`✅ NestJS server is running on http://${host}:${port}`);
     logger.log(
-      `📊 Database: ${dbStats.totalConnections} connections, ${dbStats.databaseSize} size`
+      `📊 Database: ${dbStats.totalConnections} connections, ${dbStats.databaseSize} size`,
     );
     logger.log(`🏥 Health: http://${host}:${port}/api/development/health`);
     logger.log(`🔧 Environment: ${process.env.NODE_ENV || "development"}`);
@@ -127,7 +127,7 @@ async function bootstrap() {
     } else if (error.message.includes("ECONNREFUSED")) {
       logger.error("💡 Database connection refused. Please ensure:");
       logger.error(
-        "   - PostgreSQL is running: pg_isready or systemctl status postgresql"
+        "   - PostgreSQL is running: pg_isready or systemctl status postgresql",
       );
       logger.error("   - DATABASE_URL is correct in your .env file");
     }

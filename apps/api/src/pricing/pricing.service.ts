@@ -33,7 +33,7 @@ export class PricingService {
   private readonly logger = new Logger(PricingService.name);
 
   async calculateCurrentPrice(
-    eventId: string
+    eventId: string,
   ): Promise<PriceCalculationResult> {
     const [event] = await db
       .select()
@@ -52,16 +52,16 @@ export class PricingService {
     // Calculate individual adjustments
     const timeBasedAdjustment = this.calculateTimeBasedAdjustment(
       event.date,
-      pricingRules.timeBased
+      pricingRules.timeBased,
     );
     const demandBasedAdjustment = await this.calculateDemandBasedAdjustment(
       eventId,
-      pricingRules.demandBased
+      pricingRules.demandBased,
     );
     const inventoryBasedAdjustment = this.calculateInventoryBasedAdjustment(
       event.bookedTickets,
       event.capacity,
-      pricingRules.inventoryBased
+      pricingRules.inventoryBased,
     );
 
     // Calculate weighted adjustments
@@ -109,7 +109,7 @@ export class PricingService {
 
   private calculateTimeBasedAdjustment(
     eventDate: Date,
-    rule: { adjustmentRate: number }
+    rule: { adjustmentRate: number },
   ): number {
     const now = new Date();
     const timeUntilEvent = eventDate.getTime() - now.getTime();
@@ -134,7 +134,7 @@ export class PricingService {
 
   private async calculateDemandBasedAdjustment(
     eventId: string,
-    rule: { adjustmentRate: number }
+    rule: { adjustmentRate: number },
   ): Promise<number> {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
@@ -145,8 +145,8 @@ export class PricingService {
         .where(
           and(
             eq(schema.bookings.eventId, eventId),
-            sql`${schema.bookings.createdAt} >= ${oneHourAgo}`
-          )
+            sql`${schema.bookings.createdAt} >= ${oneHourAgo}`,
+          ),
         );
 
       const bookingCount = recentBookings[0]?.count || 0;
@@ -163,7 +163,7 @@ export class PricingService {
     } catch (error) {
       this.logger.error(
         `Error calculating demand-based adjustment for event ${eventId}:`,
-        error
+        error,
       );
       return 0; // Return no adjustment on error
     }
@@ -172,7 +172,7 @@ export class PricingService {
   private calculateInventoryBasedAdjustment(
     bookedTickets: number,
     capacity: number,
-    rule: { adjustmentRate: number }
+    rule: { adjustmentRate: number },
   ): number {
     if (capacity === 0) return 0; // Prevent division by zero
 
@@ -206,7 +206,7 @@ export class PricingService {
         .where(eq(schema.events.id, eventId));
 
       this.logger.log(
-        `Updated price for event ${eventId}: $${priceCalculation.finalPrice}`
+        `Updated price for event ${eventId}: $${priceCalculation.finalPrice}`,
       );
     } catch (error) {
       this.logger.error(`Failed to update price for event ${eventId}:`, error);
@@ -216,7 +216,7 @@ export class PricingService {
 
   async calculatePriceForBooking(
     eventId: string,
-    ticketCount: number
+    ticketCount: number,
   ): Promise<{
     pricePerTicket: number;
     totalAmount: number;
@@ -241,7 +241,7 @@ export class PricingService {
           .select()
           .from(schema.events)
           .where(
-            sql`${schema.events.id} IN (${eventIds.map((id) => sql`${id}`)})`
+            sql`${schema.events.id} IN (${eventIds.map((id) => sql`${id}`)})`,
           );
       } else {
         // Update all active future events
@@ -251,8 +251,8 @@ export class PricingService {
           .where(
             and(
               eq(schema.events.isActive, true),
-              sql`${schema.events.date} > NOW()`
-            )
+              sql`${schema.events.date} > NOW()`,
+            ),
           );
       }
 
@@ -264,7 +264,7 @@ export class PricingService {
         } catch (error) {
           this.logger.error(
             `Failed to update price for event ${event.id}:`,
-            error
+            error,
           );
           // Continue with other events even if one fails
         }
@@ -311,7 +311,7 @@ export class PricingService {
   // Method to simulate price changes over time (for testing/demo)
   async simulatePriceChange(
     eventId: string,
-    hoursFromNow: number
+    hoursFromNow: number,
   ): Promise<number> {
     const [event] = await db
       .select()
@@ -334,16 +334,16 @@ export class PricingService {
     // Calculate adjustments with simulated time
     const timeBasedAdjustment = this.calculateTimeBasedAdjustment(
       simulatedDate,
-      pricingRules.timeBased
+      pricingRules.timeBased,
     );
     const demandBasedAdjustment = await this.calculateDemandBasedAdjustment(
       eventId,
-      pricingRules.demandBased
+      pricingRules.demandBased,
     );
     const inventoryBasedAdjustment = this.calculateInventoryBasedAdjustment(
       event.bookedTickets,
       event.capacity,
-      pricingRules.inventoryBased
+      pricingRules.inventoryBased,
     );
 
     const totalAdjustment =
@@ -354,7 +354,7 @@ export class PricingService {
     let simulatedPrice = basePrice * (1 + totalAdjustment);
     simulatedPrice = Math.max(
       floorPrice,
-      Math.min(ceilingPrice, simulatedPrice)
+      Math.min(ceilingPrice, simulatedPrice),
     );
 
     return parseFloat(simulatedPrice.toFixed(2));

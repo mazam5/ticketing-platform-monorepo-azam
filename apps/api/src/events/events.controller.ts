@@ -91,11 +91,11 @@ export class EventsController {
   @UseGuards(AdminAuthGuard)
   async create(
     @Body(new ZodValidationPipe(createEventSchema))
-    createEventDto: any
+    createEventDto: any,
   ) {
     try {
       const event = (await this.eventsService.create(
-        createEventDto
+        createEventDto,
       )) as EventResponse;
       return {
         success: true,
@@ -237,10 +237,10 @@ export class EventsController {
       // Safe type checking with proper array methods
       const totalEvents = events.length;
       const activeEvents = events.filter(
-        (e: EventResponse) => e.isActive
+        (e: EventResponse) => e.isActive,
       ).length;
       const upcomingEvents = events.filter(
-        (e: EventResponse) => new Date(e.date) > new Date()
+        (e: EventResponse) => new Date(e.date) > new Date(),
       ).length;
 
       return {

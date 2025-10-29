@@ -1,4 +1,5 @@
 "use server";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function handleBooking({
   eventId,
@@ -10,7 +11,7 @@ export async function handleBooking({
   quantity: number;
 }) {
   try {
-    const res = await fetch("http://localhost:3001/api/bookings", {
+    const res = await fetch(`${apiUrl}/api/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

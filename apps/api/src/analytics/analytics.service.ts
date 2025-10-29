@@ -1,4 +1,3 @@
-// apps/backend/src/analytics/analytics.service.ts
 import { Injectable, Logger } from "@nestjs/common";
 import { eq, sql, and, gte, desc } from "drizzle-orm";
 import { db, schema } from "../../../../packages/database/src";
@@ -88,8 +87,8 @@ export class AnalyticsService {
         .where(
           and(
             eq(schema.bookings.eventId, eventId),
-            gte(schema.bookings.createdAt, sevenDaysAgo)
-          )
+            gte(schema.bookings.createdAt, sevenDaysAgo),
+          ),
         )
         .then((rows) => Number(rows[0].bookings) || 0);
 
@@ -100,8 +99,8 @@ export class AnalyticsService {
           and(
             eq(schema.bookings.eventId, eventId),
             gte(schema.bookings.createdAt, fourteenDaysAgo),
-            sql`${schema.bookings.createdAt} < ${sevenDaysAgo}`
-          )
+            sql`${schema.bookings.createdAt} < ${sevenDaysAgo}`,
+          ),
         )
         .then((rows) => Number(rows[0].bookings) || 0);
 
@@ -157,7 +156,7 @@ export class AnalyticsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to get event analytics: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -209,13 +208,13 @@ export class AnalyticsService {
         .from(schema.events)
         .leftJoin(
           schema.bookings,
-          eq(schema.bookings.eventId, schema.events.id)
+          eq(schema.bookings.eventId, schema.events.id),
         )
         .groupBy(
           schema.events.id,
           schema.events.name,
           schema.events.capacity,
-          schema.events.bookedTickets
+          schema.events.bookedTickets,
         )
         .orderBy(desc(sql`COALESCE(SUM(${schema.bookings.totalAmount}), 0)`))
         .limit(5);
@@ -292,7 +291,7 @@ export class AnalyticsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to get system analytics: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -302,7 +301,7 @@ export class AnalyticsService {
    * Get revenue analytics with time-based breakdown
    */
   async getRevenueAnalytics(
-    timeRange: "7d" | "30d" | "90d" = "30d"
+    timeRange: "7d" | "30d" | "90d" = "30d",
   ): Promise<RevenueAnalytics> {
     try {
       let startDate: Date;
@@ -372,7 +371,7 @@ export class AnalyticsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to get revenue analytics: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }
@@ -435,7 +434,7 @@ export class AnalyticsService {
             bookings: result,
             rate: timeframe === 1 ? result : result / timeframe,
           };
-        })
+        }),
       );
 
       return {
@@ -461,7 +460,7 @@ export class AnalyticsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to get booking trends: ${error.message}`,
-        error.stack
+        error.stack,
       );
       throw error;
     }

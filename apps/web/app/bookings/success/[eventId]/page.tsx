@@ -27,6 +27,8 @@ const BookingSuccessPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     if (eventId) {
       fetchBooking();
@@ -36,9 +38,7 @@ const BookingSuccessPage = () => {
   const fetchBooking = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `http://localhost:3001/api/bookings?eventId=${eventId}`,
-      );
+      const response = await fetch(`${apiUrl}/api/bookings?eventId=${eventId}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch booking details");

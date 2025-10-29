@@ -18,7 +18,7 @@ export class SeedController {
 
   constructor(
     private readonly seedService: SeedService,
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
   ) {}
   async checkDatabase(): Promise<{
     status: string;
@@ -31,7 +31,7 @@ export class SeedController {
       // Test basic database operations
       const versionResult = await db.execute("SELECT version() as version");
       const dbResult = await db.execute(
-        "SELECT current_database() as db_name, current_schema() as schema_name"
+        "SELECT current_database() as db_name, current_schema() as schema_name",
       );
 
       // Check if our tables exist
@@ -43,10 +43,10 @@ export class SeedController {
               `);
 
       const existingTables = tablesResult.rows.map(
-        (row: any) => row.table_name
+        (row: any) => row.table_name,
       );
       const missingTables = ["events", "bookings"].filter(
-        (table) => !existingTables.includes(table)
+        (table) => !existingTables.includes(table),
       );
 
       return {

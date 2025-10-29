@@ -43,7 +43,7 @@ export class BookingsService {
 
   constructor(
     private readonly pricingService: PricingService,
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
   ) {}
 
   async create(createBookingDto: CreateBooking) {
@@ -82,7 +82,7 @@ export class BookingsService {
         const newBookedTickets = event.bookedTickets + ticketCount;
         if (newBookedTickets > event.capacity) {
           throw new ConflictException(
-            `Not enough tickets available. Only ${event.capacity - event.bookedTickets} tickets remaining.`
+            `Not enough tickets available. Only ${event.capacity - event.bookedTickets} tickets remaining.`,
           );
         }
 
@@ -137,7 +137,7 @@ export class BookingsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to create booking: ${error.message}`,
-        error.stack
+        error.stack,
       );
       if (
         error instanceof ConflictException ||
@@ -228,10 +228,10 @@ export class BookingsService {
       return result;
     } catch (error: any) {
       this.logger.error(
-        `Failed to find bookings by customer: ${error.message}`
+        `Failed to find bookings by customer: ${error.message}`,
       );
       throw new InternalServerErrorException(
-        "Failed to retrieve customer bookings"
+        "Failed to retrieve customer bookings",
       );
     }
   }
@@ -269,7 +269,7 @@ export class BookingsService {
     } catch (error: any) {
       this.logger.error(`Failed to get booking stats: ${error.message}`);
       throw new InternalServerErrorException(
-        "Failed to retrieve booking statistics"
+        "Failed to retrieve booking statistics",
       );
     }
   }
@@ -289,7 +289,7 @@ export class BookingsService {
 
         if (booking.customerEmail !== customerEmail) {
           throw new BadRequestException(
-            "You can only cancel your own bookings"
+            "You can only cancel your own bookings",
           );
         }
 
@@ -302,7 +302,7 @@ export class BookingsService {
         // Check if event has already occurred
         if (event && new Date() > event.date) {
           throw new BadRequestException(
-            "Cannot cancel booking for an event that has already occurred"
+            "Cannot cancel booking for an event that has already occurred",
           );
         }
 
@@ -316,7 +316,7 @@ export class BookingsService {
           const newBookedTickets = event.bookedTickets - booking.ticketCount;
           const newPrice = await this.calculateDynamicPrice(
             event,
-            -booking.ticketCount
+            -booking.ticketCount,
           );
 
           await tx.execute(sql`
@@ -336,7 +336,7 @@ export class BookingsService {
         await this.clearBookingCaches(
           booking.eventId,
           customerEmail,
-          bookingId
+          bookingId,
         );
 
         return {
@@ -349,7 +349,7 @@ export class BookingsService {
     } catch (error: any) {
       this.logger.error(
         `Failed to cancel booking: ${error.message}`,
-        error.stack
+        error.stack,
       );
       if (
         error instanceof NotFoundException ||
@@ -364,7 +364,7 @@ export class BookingsService {
   // Private helper methods
   private validateBookingInput(
     ticketCount: number,
-    customerEmail: string
+    customerEmail: string,
   ): void {
     if (ticketCount <= 0) {
       throw new BadRequestException("Ticket count must be greater than 0");
@@ -372,7 +372,7 @@ export class BookingsService {
 
     if (ticketCount > this.MAX_TICKETS_PER_BOOKING) {
       throw new BadRequestException(
-        `Cannot book more than ${this.MAX_TICKETS_PER_BOOKING} tickets at once`
+        `Cannot book more than ${this.MAX_TICKETS_PER_BOOKING} tickets at once`,
       );
     }
 
@@ -391,12 +391,12 @@ export class BookingsService {
     const canProceed = await this.redisService.checkRateLimit(
       rateLimitKey,
       this.RATE_LIMIT_COUNT,
-      this.RATE_LIMIT_WINDOW_MS
+      this.RATE_LIMIT_WINDOW_MS,
     );
 
     if (!canProceed) {
       throw new BadGatewayException(
-        "Too many booking attempts. Please try again in a minute."
+        "Too many booking attempts. Please try again in a minute.",
       );
     }
   }
@@ -413,7 +413,7 @@ export class BookingsService {
 
   private async calculateDynamicPrice(
     event: any,
-    ticketCountChange: number
+    ticketCountChange: number,
   ): Promise<number> {
     // Simple dynamic pricing algorithm based on demand
     const basePrice = parseFloat(event.basePrice);
@@ -468,7 +468,7 @@ export class BookingsService {
   private async clearBookingCaches(
     eventId: string,
     customerEmail: string,
-    bookingId?: string
+    bookingId?: string,
   ): Promise<void> {
     const cacheKeys = [
       `events:${eventId}`,
@@ -484,7 +484,7 @@ export class BookingsService {
     }
 
     await Promise.allSettled(
-      cacheKeys.map((key) => this.redisService.del(key))
+      cacheKeys.map((key) => this.redisService.del(key)),
     );
   }
 }

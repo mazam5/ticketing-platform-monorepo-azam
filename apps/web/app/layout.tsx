@@ -1,5 +1,5 @@
-import { ModeToggle } from "components/theme/mode-toggle";
-import { ThemeProvider } from "components/theme/theme-provider";
+import { ModeToggle } from "@/components/theme/mode-toggle";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Calendar, Ticket, User } from "lucide-react";
 import Link from "next/link";
 import "./globals.css";

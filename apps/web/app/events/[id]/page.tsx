@@ -6,7 +6,9 @@ import { format } from "date-fns";
 import { Event } from "utils/types";
 
 async function getEvent(id: string) {
-  const res = await fetch(`http://localhost:3001/api/events/${id}`, {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  const res = await fetch(`${apiUrl}/api/events/${id}`, {
     cache: "no-store",
   });
 

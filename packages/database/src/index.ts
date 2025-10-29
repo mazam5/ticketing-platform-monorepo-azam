@@ -1,13 +1,9 @@
-// packages/database/src/index.ts
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
 import { config } from "dotenv";
-// import { Logger } from "@nestjs/common";
 
 config();
-
-// const logger = new Logger("Database");
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,

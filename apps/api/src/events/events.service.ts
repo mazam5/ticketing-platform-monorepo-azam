@@ -9,7 +9,7 @@ import { RedisService } from "../redis/redis.service";
 export class EventsService {
   constructor(
     private readonly pricingService: PricingService,
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
   ) {}
 
   async findAll() {
@@ -26,8 +26,8 @@ export class EventsService {
       .where(
         and(
           eq(schema.events.isActive, true),
-          gt(schema.events.date, new Date())
-        )
+          gt(schema.events.date, new Date()),
+        ),
       )
       .orderBy(asc(schema.events.date));
 

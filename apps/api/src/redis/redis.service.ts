@@ -191,7 +191,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
       // Fallback: try to clear using keys pattern (this may not work for all stores)
       this.logger.warn(
-        "⚠️ Store reset not available, using manual key tracking"
+        "⚠️ Store reset not available, using manual key tracking",
       );
       return false;
     } catch (error: any) {
@@ -222,12 +222,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
           await this.del(key);
         }
         this.logger.log(
-          `✅ Cache cleared successfully, removed ${keys.length} keys`
+          `✅ Cache cleared successfully, removed ${keys.length} keys`,
         );
         return true;
       } else {
         this.logger.warn(
-          "⚠️ Cache store does not support reset or keys operations"
+          "⚠️ Cache store does not support reset or keys operations",
         );
         return false;
       }
@@ -292,11 +292,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async checkRateLimit(
     key: string,
     limit: number,
-    windowMs: number
+    windowMs: number,
   ): Promise<boolean> {
     if (!this.isConnected) {
       this.logger.warn(
-        `Redis not connected, rate limiting disabled for: ${key}`
+        `Redis not connected, rate limiting disabled for: ${key}`,
       );
       return true; // Allow requests if Redis is down
     }
@@ -312,7 +312,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
       if (recentRequests.length >= limit) {
         this.logger.warn(
-          `🚫 Rate limit exceeded for key: ${key}, requests: ${recentRequests.length}, limit: ${limit}`
+          `🚫 Rate limit exceeded for key: ${key}, requests: ${recentRequests.length}, limit: ${limit}`,
         );
         return false; // Rate limit exceeded
       }
@@ -323,7 +323,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
       if (success) {
         this.logger.debug(
-          `✅ Rate limit check passed for key: ${key}, requests: ${recentRequests.length}`
+          `✅ Rate limit check passed for key: ${key}, requests: ${recentRequests.length}`,
         );
       }
 
@@ -331,7 +331,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     } catch (error: any) {
       this.logger.error(
         `Error checking rate limit for key ${key}:`,
-        error.message
+        error.message,
       );
       // If we get an error, mark as disconnected and retest
       await this.testConnection();
@@ -395,7 +395,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       }
 
       this.logger.warn(
-        `⚠️ Redis not ready (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`
+        `⚠️ Redis not ready (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`,
       );
 
       if (attempt < maxRetries) {
@@ -404,7 +404,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     this.logger.error(
-      `❌ Redis failed to become ready after ${maxRetries} attempts`
+      `❌ Redis failed to become ready after ${maxRetries} attempts`,
     );
     return false;
   }

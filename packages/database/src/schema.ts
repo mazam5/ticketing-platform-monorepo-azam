@@ -93,7 +93,7 @@ export const pricingRulesSchema = z
     },
     {
       message: "Pricing rule weights must sum to 1",
-    }
+    },
   );
 
 export const createEventSchema = z.object({

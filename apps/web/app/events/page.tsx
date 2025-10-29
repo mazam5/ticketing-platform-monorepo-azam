@@ -12,7 +12,8 @@ import Link from "next/link";
 import { format } from "date-fns";
 
 const EventsPage = async () => {
-  const data = await fetch("http://localhost:3001/api/events");
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const data = await fetch(`${apiUrl}/api/events`);
   const res = await data.json();
   const events: Event[] = await res.data;
 

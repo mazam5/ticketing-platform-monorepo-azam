@@ -7,7 +7,7 @@ import {
   Zap,
   TrendingUp,
 } from "lucide-react";
-import { ModeToggle } from "components/theme/mode-toggle";
+import { ModeToggle } from "@/components/theme/mode-toggle";
 
 export default function Home() {
   return (
